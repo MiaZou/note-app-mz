@@ -5,6 +5,7 @@ import List from './components/List';
 import Note from './components/Note';
 import axios from 'axios';
 import urlFor from './helpers/urlFor';
+import Flash from './components/Flash';
 
 
 class App extends React.Component {
@@ -13,7 +14,9 @@ class App extends React.Component {
     this.state = {
       showNote: false,
       notes: [],
-      note: {}
+      note: {},
+      newTag: false,
+      error: ''
     };
   }
 
@@ -38,16 +41,23 @@ class App extends React.Component {
 
   performSubmissionRequest = (data, id) => {
     if (id) {
-      return axios.patch(urlFor(`notes/${id}`), data)
+      return axios.patch(urlFor(`notes/${id}`), data);
     } else {
-      return axios.post(urlFor('notes'), data)
+      return axios.post(urlFor('notes'), data);
     }
   }
 
   submitNote = (data, id) => {
     this.performSubmissionRequest(data, id)
     .then((res) => this.setState({ showNote: false }) )
-    .catch((err) => console.log(err.response.data) );
+    .catch((err) => {
+      const { errors } = err.response.data;
+      if (errors.content) {
+        this.setState({error: "Missing Note Content!"});
+      } else if (errors.title) {
+        this.setState({error: "Missing Note Title!"});
+      }
+    });
   }
 
   deleteNote = (id) => {
@@ -57,16 +67,51 @@ class App extends React.Component {
     .catch((err) => console.log(err.response.data) );
   }
 
+  showTagForm = () => {
+    this.setState({ newTag: true });
+  }
+
+  closeTagForm = () => {
+    this.setState({ newTag: false });
+  }
+
+  submitTag = (data, noteId) => {
+    axios.post(urlFor(`notes/${noteId}/tags`), data)
+    .then((res) => this.getNote(noteId) )
+    .catch((err) => {
+      const { errors } = err.response.data;
+      if (errors.name) {
+        this.setState({ error: "Missing Tag Name!"});
+      }
+    } );
+  }
+
+  deleteTag = (noteId, id) => {
+    axios.delete(urlFor(`/tags/${id}`))
+    .then((res) => this.getNote(noteId))
+    .catch((err) => console.log(err.response.data));
+  }
+
+  resetError = () => {
+    this.setState({ error: '' });
+  }
+
   render() {
-    const { showNote, notes, note } = this.state;
+    const { showNote, notes, note, newTag, error } = this.state;
 
     return (
       <div className="App">
-        <Nav toggleNote={this.toggleNote} showNote={showNote}/>
+        <Nav toggleNote={this.toggleNote} showNote={showNote} />
+          {error && <Flash error={error} resetError={this.resetError} />}
           { showNote ? 
             <Note
               note={note}
               submitNote={this.submitNote}
+              showTagForm={this.showTagForm}
+              newTag={newTag}
+              closeTagForm={this.closeTagForm}
+              submitTag={this.submitTag}
+              deleteTag={this.deleteTag}
             />
             :
             <List 
@@ -74,9 +119,8 @@ class App extends React.Component {
               notes={notes}
               getNote={this.getNote}
               deleteNote={this.deleteNote}
-            />}
-
-
+            />
+          }
       </div>
     );
   }
