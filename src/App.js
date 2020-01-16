@@ -35,6 +35,12 @@ class App extends React.Component {
     .catch((err) => console.log(err.response.data) );
   }
 
+  submitNote = (data) => {
+    axios.post(urlFor('notes'), data)
+    .then((res) => this.setState({ showNote: false }) )
+    .catch((err) => console.log(err.response.data) );
+  }
+
   render() {
     const { showNote, notes, note } = this.state;
 
@@ -44,6 +50,7 @@ class App extends React.Component {
           { showNote ? 
             <Note
               note={note}
+              submitNote={this.submitNote}
             />
             :
             <List 
