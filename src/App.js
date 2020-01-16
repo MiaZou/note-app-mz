@@ -4,6 +4,7 @@ import Nav from './components/Nav';
 import List from './components/List';
 import Note from './components/Note';
 import axios from 'axios';
+import urlFor from './helpers/urlFor';
 
 class App extends React.Component {
   constructor() {
@@ -20,7 +21,9 @@ class App extends React.Component {
   }
 
   getNotes = () => {
-    axios.get('http://note-api-mz.herokuapp.com/notes').then((res) => console.log(res.data) ).catch((err) => console.log(err.response.data) );
+    axios.get(urlFor('notes'))
+    .then((res) => console.log(res.data) )
+    .catch((err) => console.log(err.response.data) );
   }
 
   render() {
