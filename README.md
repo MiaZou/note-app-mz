@@ -4,7 +4,7 @@ Note-app is a note-taking app that integrates with JavaScript ES6, React framewo
 
 <img src="images/notes.jpg">
 
-Heroku Link: http://note-app-mz.herokuapp.com/
+Heroku Link: https://note-app-mz.herokuapp.com/
 
 ## Getting Started
 ### Prerequisites
